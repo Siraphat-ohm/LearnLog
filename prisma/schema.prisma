@@ -1,0 +1,78 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum Reason {
+  SICK
+  ABSENCE
+  LATE
+  DITCH
+  PERSONAL
+}
+
+model Student {
+  id String @id
+  firstname String
+  lastname String
+  classroom Classroom? @relation(fields: [classroomId], references: [id])
+  classroomId String?
+  records Record[]
+}
+
+model Teacher {
+  id String @id
+  firstname String
+  lastname String
+  attendance Attendance[]
+  classroom Classroom? @relation( fields: [classroomId], references: [id])
+  classroomId String?
+  periods Period[]
+}
+
+model Subject {
+  id String @id
+  name String
+  periods Period[]
+}
+
+model Classroom {
+  id String @id
+  name String
+  students Student[]
+  advicers Teacher[]
+  periods Period[]
+}
+
+model Period {
+  id String @id
+  teacher Teacher? @relation(fields: [teacherId], references: [id])
+  teacherId String?
+  subject Subject? @relation(fields: [subjectId], references: [id])
+  subjectId String?
+  classroom Classroom[]
+  attendances Attendance[]
+}
+
+model Record {
+  id String @id @default(uuid())
+  student Student? @relation(fields: [studentId], references: [id])
+  studentId String?
+  reason Reason
+  attendance Attendance? @relation(fields: [attendanceId], references: [id])
+  attendanceId String?
+}
+
+model Attendance {
+  id String @id @default(uuid())
+  date DateTime @default(now())
+  teacher Teacher @relation(fields: [teacherId], references: [id])
+  teacherId String
+  period Period @relation(fields: [periodId],  references: [id])
+  periodId String
+  records Record[]
+}
